@@ -22,49 +22,16 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blueAccent,
-      body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Container(
-          child: Column(
-            // mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 300),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Kutuku",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 50,
-                            color: Colors.white),
-                      ),
-                      Text(
-                        "Any shopping just from home",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w300,
-                            fontSize: 20,
-                            color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Spacer(),
-              Text(
-                "version 1.0.0",
-                style: TextStyle(
-                    fontWeight: FontWeight.w300,
-                    fontSize: 20,
-                    color: Colors.white),
-              ),
-            ],
+        appBar: null,
+        body: Container(
+          decoration: BoxDecoration(
+              image: DecorationImage(
+            image: AssetImage('assets/images/bg.png'),
+            fit: BoxFit.cover,
+          )),
+          child: Center(
+            child: Image.asset('assets/images/logo.png'),
           ),
-        ),
-      ),
-    );
+        ));
   }
 }

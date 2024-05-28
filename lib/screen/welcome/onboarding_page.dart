@@ -104,7 +104,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
               child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.all(10),
-                    backgroundColor: Colors.blueAccent,
+                    backgroundColor: Colors.greenAccent,
                   ),
                   onPressed: () {
                     Navigator.push(
@@ -114,7 +114,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                   },
                   child: Text(
                     "Create Account",
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.white, fontSize: 18),
                   )),
             ),
             SizedBox(
@@ -128,9 +128,9 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
               child: Text(
                 'Already Have an Account',
                 style: TextStyle(
-                    color: Colors.blueAccent,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
+                    color: Colors.grey,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700),
                 textAlign: TextAlign.center,
               ),
             ),
