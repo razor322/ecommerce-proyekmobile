@@ -1,10 +1,12 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'package:ecommerce_app/components/bottom_navigation.dart';
 import 'package:ecommerce_app/components/custom_snackbar.dart';
 import 'package:ecommerce_app/const.dart';
 import 'package:ecommerce_app/model/auth/model_login.dart';
 import 'package:ecommerce_app/screen/auth/register_page.dart';
 import 'package:ecommerce_app/screen/home_page.dart';
+import 'package:ecommerce_app/utils/cek_session.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -35,13 +37,17 @@ class _LoginpageState extends State<Loginpage> {
         ModelLogin data = modelLoginFromJson(res.body);
 
         if (data.value == 1) {
-          // session.saveSession(data.value ?? 0, data.idUser ?? "",
-          //     data.username ?? "", data.email ?? "");
+          session.saveSession(data.value ?? 0, data.id ?? "", data.email ?? "",
+              data.username ?? "");
 
           Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => HomePage()),
+              MaterialPageRoute(builder: (context) => BotNav()),
               (route) => false);
+          // Navigator.pushAndRemoveUntil(
+          //     context,
+          //     MaterialPageRoute(builder: (context) => HomePage()),
+          //     (route) => false);
           return true;
         } else {
           ScaffoldMessenger.of(context)
