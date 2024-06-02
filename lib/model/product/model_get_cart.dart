@@ -1,83 +1,90 @@
 // To parse this JSON data, do
 //
-//     final modelProduct = modelProductFromJson(jsonString);
+//     final modelGetCart = modelGetCartFromJson(jsonString);
 
 import 'dart:convert';
 
-ModelProduct modelProductFromJson(String str) =>
-    ModelProduct.fromJson(json.decode(str));
+ModelGetCart modelGetCartFromJson(String str) =>
+    ModelGetCart.fromJson(json.decode(str));
 
-String modelProductToJson(ModelProduct data) => json.encode(data.toJson());
+String modelGetCartToJson(ModelGetCart data) => json.encode(data.toJson());
 
-class ModelProduct {
+class ModelGetCart {
   int value;
   String message;
-  List<Product> products;
+  List<Cart> cart;
 
-  ModelProduct({
+  ModelGetCart({
     required this.value,
     required this.message,
-    required this.products,
+    required this.cart,
   });
 
-  factory ModelProduct.fromJson(Map<String, dynamic> json) => ModelProduct(
+  factory ModelGetCart.fromJson(Map<String, dynamic> json) => ModelGetCart(
         value: json["value"],
         message: json["message"],
-        products: List<Product>.from(
-            json["products"].map((x) => Product.fromJson(x))),
+        cart: List<Cart>.from(json["cart"].map((x) => Cart.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
         "value": value,
         "message": message,
-        "products": List<dynamic>.from(products.map((x) => x.toJson())),
+        "cart": List<dynamic>.from(cart.map((x) => x.toJson())),
       };
 }
 
-class Product {
-  String productId;
+class Cart {
+  int cartId;
+  int userId;
+  int productId;
+  DateTime createdAt;
+  DateTime updated;
   String productName;
   String productCategory;
   String productDescription;
   String productImage;
-  String productPrice;
+  int productPrice;
   String productStore;
-  DateTime created;
-  dynamic updated;
 
-  Product({
+  Cart({
+    required this.cartId,
+    required this.userId,
     required this.productId,
+    required this.createdAt,
+    required this.updated,
     required this.productName,
     required this.productCategory,
     required this.productDescription,
     required this.productImage,
     required this.productPrice,
     required this.productStore,
-    required this.created,
-    required this.updated,
   });
 
-  factory Product.fromJson(Map<String, dynamic> json) => Product(
+  factory Cart.fromJson(Map<String, dynamic> json) => Cart(
+        cartId: json["cart_id"],
+        userId: json["user_id"],
         productId: json["product_id"],
+        createdAt: DateTime.parse(json["created_at"]),
+        updated: DateTime.parse(json["updated"]),
         productName: json["product_name"],
         productCategory: json["product_category"],
         productDescription: json["product_description"],
         productImage: json["product_image"],
         productPrice: json["product_price"],
         productStore: json["product_store"],
-        created: DateTime.parse(json["created"]),
-        updated: json["updated"],
       );
 
   Map<String, dynamic> toJson() => {
+        "cart_id": cartId,
+        "user_id": userId,
         "product_id": productId,
+        "created_at": createdAt.toIso8601String(),
+        "updated": updated.toIso8601String(),
         "product_name": productName,
         "product_category": productCategory,
         "product_description": productDescription,
         "product_image": productImage,
         "product_price": productPrice,
         "product_store": productStore,
-        "created": created.toIso8601String(),
-        "updated": updated,
       };
 }
