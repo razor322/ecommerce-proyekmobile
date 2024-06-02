@@ -1,3 +1,4 @@
+import 'package:ecommerce_app/screen/cart/cart_page.dart';
 import 'package:ecommerce_app/screen/home_page.dart';
 import 'package:ecommerce_app/screen/product/list_product_fav.dart';
 import 'package:ecommerce_app/screen/user/profil_page.dart';
@@ -13,7 +14,7 @@ class BotNav extends StatefulWidget {
 class _BotNavState extends State<BotNav> {
   final screen = [
     const HomePage(),
-    const HomePage(),
+    const CartPage(),
     ListProductFavPage(),
     ProfilUser()
   ];
