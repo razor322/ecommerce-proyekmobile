@@ -1,10 +1,15 @@
+import 'package:ecommerce_app/components/custom_snackbar.dart';
 import 'package:ecommerce_app/const.dart';
+import 'package:ecommerce_app/model/cart/model_add_cart.dart';
+import 'package:ecommerce_app/model/product/model_add_fav.dart';
+import 'package:ecommerce_app/model/product/model_get_fav.dart';
 import 'package:ecommerce_app/model/product/model_get_product.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DetailProductPage extends StatefulWidget {
-  final Product? data;
+  final dynamic data; // Accepts either Product or Favorite
   DetailProductPage(this.data, {super.key});
 
   @override
@@ -12,11 +17,43 @@ class DetailProductPage extends StatefulWidget {
 }
 
 class _DetailProductPageState extends State<DetailProductPage> {
-  int _quantity = 2;
+  int _quantity = 1;
+  String? id;
+  double _totalPrice = 0.0;
+  bool isLoadoing = false;
+
+  Product get _productData {
+    if (widget.data is Product) {
+      return widget.data;
+    } else if (widget.data is Favorite) {
+      final favorite = widget.data as Favorite;
+      return Product(
+        productId: favorite.productId.toString(),
+        productName: favorite.productName,
+        productDescription: favorite.productDescription,
+        productImage: favorite.productImage,
+        productPrice: favorite.productPrice.toString(),
+        productStore: favorite.productStore,
+        created: favorite.createdAt,
+        updated: favorite.updated.toString(), productCategory: '',
+        // Add other necessary fields and conversions here
+      );
+    }
+    throw Exception("Invalid data type");
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getSession();
+    _totalPrice = _calculateTotalPrice(); // Initialize the total price
+    print('id produk ${_productData.productId} ');
+  }
 
   void _incrementQuantity() {
     setState(() {
       _quantity++;
+      _totalPrice = _calculateTotalPrice(); // Update the total price
     });
   }
 
@@ -24,13 +61,81 @@ class _DetailProductPageState extends State<DetailProductPage> {
     setState(() {
       if (_quantity > 1) {
         _quantity--;
+        _totalPrice = _calculateTotalPrice(); // Update the total price
       }
     });
   }
 
+  double _calculateTotalPrice() {
+    final productPrice =
+        double.tryParse(_productData.productPrice ?? '0') ?? 0.0;
+    return productPrice * _quantity;
+  }
+
+  Future getSession() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    setState(() {
+      id = pref.getString("id") ?? '';
+      print('id user $id');
+    });
+  }
+
+  Future<void> addFav(String idp) async {
+    try {
+      http.Response res = await http.post(Uri.parse('${url}add_favorite.php'),
+          body: {"user_id": id, "product_id": idp});
+
+      if (res.statusCode == 200) {
+        ModelAddFavorite data = modelAddFavoriteFromJson(res.body);
+
+        if (data.value == 1) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('${data.message}')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('${data.message}')),
+          );
+        }
+      }
+    } catch (e) {
+      print(e.toString());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('gagal menambahkan data')),
+      );
+    }
+  }
+
+  Future<void> addToCart(String idp) async {
+    try {
+      http.Response res = await http.post(Uri.parse('${url}add_cart.php'),
+          body: {"user_id": id, "product_id": idp});
+
+      if (res.statusCode == 200) {
+        ModelAddCart data = modelAddCartFromJson(res.body);
+
+        if (data.value == 1) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('${data.message}')),
+          );
+          Navigator.pop(context);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('${data.message}')),
+          );
+        }
+      }
+    } catch (e) {
+      print(e.toString());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('gagal menambahkan data')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final data = widget.data;
+    final data = _productData;
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
@@ -41,7 +146,7 @@ class _DetailProductPageState extends State<DetailProductPage> {
               height: 375,
               child: Center(
                 child: Image.network(
-                  '${urlImg}${data!.productImage}',
+                  '${urlImg}${data.productImage}',
                   fit: BoxFit.fill,
                   loadingBuilder: (BuildContext context, Widget child,
                       ImageChunkEvent? loadingProgress) {
@@ -106,12 +211,14 @@ class _DetailProductPageState extends State<DetailProductPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              data!.productName,
+                              data.productName,
                               style: TextStyle(
                                   fontSize: 24, fontWeight: FontWeight.bold),
                             ),
                             IconButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                addFav(data.productId);
+                              },
                               icon: Icon(
                                 Icons.favorite_border_rounded,
                                 color: Colors.black,
@@ -248,7 +355,7 @@ class _DetailProductPageState extends State<DetailProductPage> {
                                   TextStyle(fontSize: 30, color: Colors.green),
                               children: <TextSpan>[
                                 TextSpan(
-                                    text: data!.productPrice,
+                                    text: _totalPrice.toStringAsFixed(2),
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: Colors.black)),
@@ -258,7 +365,9 @@ class _DetailProductPageState extends State<DetailProductPage> {
                           FilledButton(
                               style: FilledButton.styleFrom(
                                   backgroundColor: Colors.green),
-                              onPressed: () {},
+                              onPressed: () {
+                                addToCart(data.productId);
+                              },
                               child: Text("add to Cart"))
                         ],
                       )

@@ -1,10 +1,12 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:buttons_tabbar/buttons_tabbar.dart';
-import 'package:ecommerce_app/components/custom_snackbar.dart';
 import 'package:ecommerce_app/const.dart';
-import 'package:ecommerce_app/model/product/model_get_product.dart';
+import 'package:ecommerce_app/model/product/model_get_fav.dart';
 import 'package:ecommerce_app/screen/product/detail_product_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ListProductFavPage extends StatefulWidget {
   const ListProductFavPage({super.key});
@@ -15,14 +17,23 @@ class ListProductFavPage extends StatefulWidget {
 
 class _ListProductFavPageState extends State<ListProductFavPage> {
   bool isLoading = false;
-  late List<Product> _productList = [];
-  late List<Product> _sortedProductList = [];
-  late List<Product> _latestProductList = [];
+  late List<Favorite> _productList = [];
+  late List<Favorite> _sortedProductList = [];
+  late List<Favorite> _latestProductList = [];
+  String? id;
 
   @override
   void initState() {
     super.initState();
-    getProduct();
+    getSession().then((value) => getProduct());
+  }
+
+  Future getSession() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    setState(() {
+      id = pref.getString("id") ?? '';
+      print('id user $id');
+    });
   }
 
   Future<void> getProduct() async {
@@ -30,10 +41,12 @@ class _ListProductFavPageState extends State<ListProductFavPage> {
       setState(() {
         isLoading = true;
       });
-      final res = await http.get(Uri.parse('${url}get_product.php'));
+      print('id userr $id');
+      final res =
+          await http.get(Uri.parse('${url}get_favorite.php?user_id=$id'));
 
       if (res.statusCode == 200) {
-        List<Product> data = modelProductFromJson(res.body).products ?? [];
+        List<Favorite> data = modelGetFavFromJson(res.body).favorites ?? [];
         setState(() {
           _productList = data;
           _sortedProductList = _sortProductsByPrice(data);
@@ -41,7 +54,9 @@ class _ListProductFavPageState extends State<ListProductFavPage> {
           _searchResult = data;
         });
       } else {
-        CustomSnackbar("Failed to load data");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed Load data')),
+        );
       }
     } catch (e) {
       ScaffoldMessenger.of(context)
@@ -52,10 +67,10 @@ class _ListProductFavPageState extends State<ListProductFavPage> {
   }
 
   TextEditingController txtcari = TextEditingController();
-  late List<Product> _searchResult = [];
+  late List<Favorite> _searchResult = [];
 
   void _filterBerita(String query) {
-    List<Product> filteredProducts = _productList
+    List<Favorite> filteredProducts = _productList
         .where((produk) =>
             produk.productName!.toLowerCase().contains(query.toLowerCase()))
         .toList();
@@ -65,16 +80,18 @@ class _ListProductFavPageState extends State<ListProductFavPage> {
   }
 
   // Sort by price
-  List<Product> _sortProductsByPrice(List<Product> products) {
-    List<Product> sortedList = List.from(products); // Create a copy of the list
+  List<Favorite> _sortProductsByPrice(List<Favorite> products) {
+    List<Favorite> sortedList =
+        List.from(products); // Create a copy of the list
     sortedList.sort((a, b) => a.productPrice.compareTo(b.productPrice));
     return sortedList;
   }
 
   // Sort by date
-  List<Product> _sortProductsByDate(List<Product> products) {
-    List<Product> sortedList = List.from(products); // Create a copy of the list
-    sortedList.sort((a, b) => b.created.compareTo(a.created));
+  List<Favorite> _sortProductsByDate(List<Favorite> products) {
+    List<Favorite> sortedList =
+        List.from(products); // Create a copy of the list
+    sortedList.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return sortedList;
   }
 
@@ -189,7 +206,7 @@ class _ListProductFavPageState extends State<ListProductFavPage> {
     );
   }
 
-  Widget buildProductGrid(List<Product> productList) {
+  Widget buildProductGrid(List<Favorite> productList) {
     return Column(
       children: [
         SizedBox(
@@ -212,11 +229,11 @@ class _ListProductFavPageState extends State<ListProductFavPage> {
             itemCount: productList.length,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              childAspectRatio: 0.7, // Optional: Adjust aspect ratio
+              childAspectRatio: 0.9,
             ),
             itemBuilder: (context, index) {
               if (productList.isNotEmpty) {
-                Product data = productList[index];
+                Favorite data = productList[index];
                 return GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -224,59 +241,39 @@ class _ListProductFavPageState extends State<ListProductFavPage> {
                         MaterialPageRoute(
                             builder: (context) => DetailProductPage(data)));
                   },
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-                    child: Card(
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: Center(
-                              child: Stack(
-                                children: [
-                                  Image.network(
-                                    '${urlImg}${data.productImage}', // Assuming Product has an imageUrl field
-                                    fit: BoxFit.cover,
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 100, top: 25),
-                                    child: Icon(Icons.favorite,
-                                        color: Colors.red, size: 25.0),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Padding(
+                  child: Card(
+                    child: Column(
+                      children: [
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              data.productName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(color: Colors.black),
+                            child: Icon(
+                              Icons.favorite_rounded,
+                              color: Colors.red,
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 3.0,
-                            ),
-                            child: Text(
-                              "\$${data.productPrice}", // Assuming Product has a price field
-                              style: TextStyle(color: Colors.red),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                        ],
-                      ),
+                        ),
+                        Image.network(
+                          '${urlImg}${data.productImage}',
+                          height: 110,
+                          fit: BoxFit.cover,
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          data.productName,
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18),
+                        ),
+                        Text('\$${data.productPrice}'),
+                      ],
                     ),
                   ),
                 );
               } else {
-                return Center(
-                  child: Text("No products available"),
-                );
+                return Center(child: Text('No products found.'));
               }
             },
           ),

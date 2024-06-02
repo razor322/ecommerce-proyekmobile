@@ -35,7 +35,9 @@ class _ListProductPageState extends State<ListProductPage> {
           _productList = modelProduct.products ?? [];
         });
       } else {
-        CustomSnackbar("Failed to load data");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed Load data')),
+        );
       }
     } catch (e) {
       ScaffoldMessenger.of(context)
