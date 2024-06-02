@@ -1,3 +1,4 @@
+import 'package:ecommerce_app/components/bottom_navigation.dart';
 import 'package:ecommerce_app/screen/home_page.dart';
 import 'package:ecommerce_app/screen/welcome/splashscreeen.dart';
 import 'package:flutter/material.dart';
@@ -34,6 +35,6 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: SplashScreen());
+        home: BotNav());
   }
 }
