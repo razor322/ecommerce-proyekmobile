@@ -79,7 +79,9 @@ class _SearchPageState extends State<SearchPage> {
           filteredProducts = listProduct;
         });
       } else {
-        CustomSnackbar("Failed to load data");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed Load data')),
+        );
       }
     } catch (e) {
       ScaffoldMessenger.of(context)
