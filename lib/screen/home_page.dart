@@ -2,6 +2,7 @@ import 'package:contained_tab_bar_view/contained_tab_bar_view.dart';
 import 'package:ecommerce_app/components/custom_snackbar.dart';
 import 'package:ecommerce_app/const.dart';
 import 'package:ecommerce_app/model/product/model_get_product.dart';
+import 'package:ecommerce_app/screen/product/category_product_page.dart';
 import 'package:ecommerce_app/screen/product/detail_product_page.dart';
 import 'package:ecommerce_app/screen/product/list_product.dart';
 import 'package:ecommerce_app/screen/search_page.dart';
@@ -29,18 +30,9 @@ class _HomePageState extends State<HomePage> {
     },
   ];
   final List<Map<String, String>> _imageCategory = [
-    {
-      'image': 'assets/images/cat1.png',
-    },
-    {
-      'image': 'assets/images/cat2.png',
-    },
-    {
-      'image': 'assets/images/cat3.png',
-    },
-    {
-      'image': 'assets/images/cat4.png',
-    },
+    {'image': 'assets/images/cat1.png', 'kategori': 'Shirts'},
+    {'image': 'assets/images/cat2.png', 'kategori': 'Bag pack'},
+    {'image': 'assets/images/cat3.png', 'kategori': 'Shoes'},
   ];
   bool isLoading = false;
   late List<Product> _productList = [];
@@ -48,6 +40,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+
     getProduct();
   }
 
@@ -64,7 +57,9 @@ class _HomePageState extends State<HomePage> {
           _productList = modelProduct.products ?? [];
         });
       } else {
-        CustomSnackbar("Failed to load data");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed Load data')),
+        );
       }
     } catch (e) {
       ScaffoldMessenger.of(context)
@@ -159,7 +154,7 @@ class _HomePageState extends State<HomePage> {
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           childAspectRatio:
-                              0.7, // Optional: Adjust aspect ratio
+                              0.8, // Optional: Adjust aspect ratio
                         ),
                         shrinkWrap: true,
                         itemBuilder: (context, index) {
@@ -221,36 +216,45 @@ class _HomePageState extends State<HomePage> {
                   itemCount: _imageCategory.length,
                   itemBuilder: (BuildContext context, index) {
                     final item = _imageCategory[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10.0),
-                      child: Container(
-                        height: 100,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
-                              spreadRadius: 2,
-                              blurRadius: 5,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 2,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.horizontal(
-                                    left: Radius.circular(10)),
-                                child: Image.asset(
-                                  item['image']!,
-                                  fit: BoxFit.cover,
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    CategoryProductPage(item['kategori']!)));
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10.0),
+                        child: Container(
+                          height: 100,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 5,
+                                offset: Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.horizontal(
+                                      left: Radius.circular(10)),
+                                  child: Image.asset(
+                                    item['image']!,
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     );
