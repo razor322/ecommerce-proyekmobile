@@ -19,8 +19,13 @@ class Loginpage extends StatefulWidget {
 
 class _LoginpageState extends State<Loginpage> {
   final _formKey = GlobalKey<FormState>();
+  final _formKeyPass = GlobalKey<FormState>();
+  final _formKeyEmail = GlobalKey<FormState>();
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
+  final TextEditingController _editpassword = TextEditingController();
+  final TextEditingController _edtemail = TextEditingController();
+
   bool _obscurepass = true;
   bool isLoading = false;
 
@@ -67,9 +72,57 @@ class _LoginpageState extends State<Loginpage> {
     return false;
   }
 
-  void _showResetPasswordDialog() {
+  Future<bool> editPass(String email, String pass) async {
+    if (_formKeyPass.currentState!.validate()) {
+      setState(() {
+        isLoading = true;
+      });
+      print(email);
+      try {
+        http.Response res = await http.post(
+            Uri.parse('${url}edit_password.php'),
+            body: {"email": email, "password": pass});
+
+        ModelLogin data = modelLoginFromJson(res.body);
+
+        if (data.value == 1) {
+          // session.saveSession(data.value ?? 0, data.id ?? "", data.email ?? "",
+          //     data.username ?? "");
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text('${data.message}')));
+
+          Navigator.pop(context);
+          // Navigator.pushAndRemoveUntil(
+          //     context,
+          //     MaterialPageRoute(builder: (context) => BotNav()),
+          //     (route) => false);
+          // Navigator.pushAndRemoveUntil(
+          //     context,
+          //     MaterialPageRoute(builder: (context) => HomePage()),
+          //     (route) => false);
+          return true;
+        } else {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text('${data.message}')));
+          return false;
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
+        return false;
+      } finally {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+    return false;
+  }
+
+  void _showResetPasswordDialog(String email) {
     TextEditingController newPasswordController = TextEditingController();
     TextEditingController reEnterPasswordController = TextEditingController();
+    print(email);
 
     showModalBottomSheet(
       context: context,
@@ -84,84 +137,86 @@ class _LoginpageState extends State<Loginpage> {
               ),
               color: Colors.white,
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 16),
-                Text(
-                  "Reset Password",
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 20),
-                Text(
-                  "Set the new password for your account so you can login and access all the features.",
-                  style: TextStyle(
-                    fontSize: 16,
-                  ),
-                ),
-                SizedBox(height: 20),
-                TextField(
-                  controller: newPasswordController,
-                  decoration: InputDecoration(
-                    hintText: 'New Password',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: Color(0xFF67729429),
-                        width: 1,
-                      ),
+            child: Form(
+              key: _formKeyPass,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 16),
+                  Text(
+                    "Reset Password",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16),
                   ),
-                  obscureText: true,
-                ),
-                SizedBox(height: 15),
-                TextField(
-                  controller: reEnterPasswordController,
-                  decoration: InputDecoration(
-                    hintText: 'Re Enter Password',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: Color(0xFF67729429),
-                        width: 1,
-                      ),
+                  SizedBox(height: 20),
+                  Text(
+                    "Set the new password for your account so you can login and access all the features.",
+                    style: TextStyle(
+                      fontSize: 16,
                     ),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16),
                   ),
-                  obscureText: true,
-                ),
-                SizedBox(height: 25),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        // Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //         builder: (context) => BotNavBar()));
-                      },
-                      child: Text("Update Password",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18)),
-                      style: ElevatedButton.styleFrom(
-                        primary: Color(0xFF0EBE7F),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                  SizedBox(height: 20),
+                  TextFormField(
+                    controller: newPasswordController,
+                    decoration: InputDecoration(
+                      hintText: 'New Password',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Color(0xFF67729429),
+                          width: 1,
                         ),
-                        minimumSize: Size(295, 54),
                       ),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16),
                     ),
-                  ],
-                ),
-              ],
+                    obscureText: true,
+                  ),
+                  SizedBox(height: 15),
+                  TextFormField(
+                    controller: reEnterPasswordController,
+                    decoration: InputDecoration(
+                      hintText: 'Re Enter Password',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Color(0xFF67729429),
+                          width: 1,
+                        ),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                    ),
+                    obscureText: true,
+                  ),
+                  SizedBox(height: 25),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          print(email);
+                          print(newPasswordController.text);
+                          editPass(email, newPasswordController.text);
+                        },
+                        child: Text("Update Password",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18)),
+                        style: ElevatedButton.styleFrom(
+                          primary: Color(0xFF0EBE7F),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          minimumSize: Size(295, 54),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -182,64 +237,69 @@ class _LoginpageState extends State<Loginpage> {
             ),
             color: Colors.white,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 16),
-              Text(
-                "Forgot Password",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                "Enter your email for the verification process, we will send a 4-digit code to your email.",
-                style: TextStyle(
-                  fontSize: 16,
-                ),
-              ),
-              SizedBox(height: 20),
-              TextField(
-                decoration: InputDecoration(
-                  hintText: 'Email',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: Color(0xFF67729429),
-                      width: 1,
-                    ),
+          child: Form(
+            key: _formKeyEmail,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 16),
+                Text(
+                  "Forgot Password",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
                   ),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16),
                 ),
-              ),
-              SizedBox(height: 25),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context); // Tutup popup forgot password
-                      _showResetPasswordDialog(); // Tampilkan popup verification code
-                    },
-                    child: Text("Continue",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18)),
-                    style: ElevatedButton.styleFrom(
-                      primary: Color(0xFF0EBE7F), // Warna tombol continue
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                SizedBox(height: 20),
+                Text(
+                  "Enter your email for the verification process, we will send a 4-digit code to your email.",
+                  style: TextStyle(
+                    fontSize: 16,
+                  ),
+                ),
+                SizedBox(height: 20),
+                TextFormField(
+                  controller: _edtemail,
+                  decoration: InputDecoration(
+                    hintText: 'Email',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: Color(0xFF67729429),
+                        width: 1,
                       ),
-                      minimumSize: Size(295, 54),
                     ),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16),
                   ),
-                ],
-              ),
-            ],
+                ),
+                SizedBox(height: 25),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context); // Tutup popup forgot password
+                        _showResetPasswordDialog(_edtemail
+                            .text); // Tampilkan popup verification code
+                      },
+                      child: Text("Continue",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18)),
+                      style: ElevatedButton.styleFrom(
+                        primary: Color(0xFF0EBE7F), // Warna tombol continue
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        minimumSize: Size(295, 54),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
