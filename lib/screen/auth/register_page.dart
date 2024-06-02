@@ -1,6 +1,5 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'package:ecommerce_app/const.dart';
+import 'package:ecommerce_app/model/auth/model_otp.dart';
 import 'package:ecommerce_app/model/auth/model_register.dart';
 import 'package:ecommerce_app/screen/auth/login_page.dart';
 import 'package:ecommerce_app/screen/auth/verification_page.dart';
@@ -26,7 +25,6 @@ class _RegisterpageState extends State<Registerpage> {
     if (_formKey.currentState!.validate()) {
       setState(() {
         isLoading = true;
-        ;
       });
 
       try {
@@ -38,24 +36,71 @@ class _RegisterpageState extends State<Registerpage> {
             });
         final data = modelRegisterFromJson(res.body);
         if (data.value == 1) {
+          otpAccount(_email.text);
           Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => VerificationPage()),
+              MaterialPageRoute(
+                  builder: (context) => VerificationPage(_email.text)),
               (route) => false);
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text(data.message)));
+          if (mounted) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text(data.message)));
+          }
         } else if (data.value == 2) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text(data.message)));
+          if (mounted) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text(data.message)));
+          }
         }
       } catch (e) {
         print(e.toString());
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.toString())));
+        if (mounted) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(e.toString())));
+        }
       } finally {
-        setState(() {
-          isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            isLoading = false;
+          });
+        }
+      }
+    }
+  }
+
+  Future<ModelOtp?> otpAccount(String emailuser) async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        isLoading = true;
+      });
+
+      try {
+        http.Response res = await http
+            .post(Uri.parse('${url}otp_send.php'), body: {"email": emailuser});
+        final data = modelOtpFromJson(res.body);
+        if (data.value == 1) {
+          if (mounted) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text(data.message)));
+          }
+        } else if (data.value == 2) {
+          if (mounted) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text(data.message)));
+          }
+        }
+      } catch (e) {
+        print(e.toString());
+        if (mounted) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(e.toString())));
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            isLoading = false;
+          });
+        }
       }
     }
   }
@@ -254,9 +299,10 @@ class _RegisterpageState extends State<Registerpage> {
                                   builder: (context) => Loginpage()),
                               (route) => false);
                         },
-                        child: const Text('Login'),
+                        child: const Text('Login',
+                            style: TextStyle(color: Colors.black)),
                       ),
-                    ),
+                    )
                   ],
                 ),
               ),

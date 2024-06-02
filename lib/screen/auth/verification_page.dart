@@ -1,8 +1,16 @@
+import 'package:ecommerce_app/components/bottom_navigation.dart';
+import 'package:ecommerce_app/const.dart';
+import 'package:ecommerce_app/model/auth/model_otp.dart';
 import 'package:ecommerce_app/screen/auth/login_page.dart';
 import 'package:ecommerce_app/screen/home_page.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class VerificationPage extends StatefulWidget {
+  final String emailuser;
+
+  VerificationPage(this.emailuser, {super.key});
+
   @override
   _VerificationPageState createState() => _VerificationPageState();
 }
@@ -12,7 +20,53 @@ class _VerificationPageState extends State<VerificationPage> {
   final TextEditingController _codeController2 = TextEditingController();
   final TextEditingController _codeController3 = TextEditingController();
   final TextEditingController _codeController4 = TextEditingController();
-  String email = 'beta@gmail.com';
+  final _formKey = GlobalKey<FormState>();
+  bool isLoading = false;
+  late String emailuserlogin;
+
+  @override
+  void initState() {
+    emailuserlogin = widget.emailuser;
+    super.initState();
+    print(
+        'Email received: $emailuserlogin'); // Print the email when the page initializes
+  }
+
+  Future<ModelOtp?> otpAccount(String emailuserotp) async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        isLoading = true;
+      });
+
+      try {
+        http.Response res =
+            await http.post(Uri.parse('${url}otp_verify.php'), body: {
+          "email": emailuserotp,
+          "otp": _codeController1.text +
+              _codeController2.text +
+              _codeController3.text +
+              _codeController4.text
+        });
+        final data = modelOtpFromJson(res.body);
+        if (data.value == 1) {
+          _showSuccessDialog();
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(data.message)));
+        } else if (data.value == 2) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(data.message)));
+        }
+      } catch (e) {
+        print(e.toString());
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
+      } finally {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,8 +77,7 @@ class _VerificationPageState extends State<VerificationPage> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-            Navigator.pop(
-                context); // Menangani tombol kembali untuk kembali ke halaman sebelumnya
+            Navigator.pop(context);
           },
         ),
       ),
@@ -44,7 +97,7 @@ class _VerificationPageState extends State<VerificationPage> {
             SizedBox(height: 20),
             Center(
               child: Text(
-                'Verification Code',
+                'Verification Code ',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
             ),
@@ -57,24 +110,29 @@ class _VerificationPageState extends State<VerificationPage> {
             ),
             Center(
               child: Text(
-                email,
+                emailuserlogin, // Use the email passed from Registerpage
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
             SizedBox(height: 30),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildCodeInput(_codeController1),
-                _buildCodeInput(_codeController2),
-                _buildCodeInput(_codeController3),
-                _buildCodeInput(_codeController4),
-              ],
+            Form(
+              key: _formKey,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildCodeInput(_codeController1),
+                  _buildCodeInput(_codeController2),
+                  _buildCodeInput(_codeController3),
+                  _buildCodeInput(_codeController4),
+                ],
+              ),
             ),
             SizedBox(height: 30),
             ElevatedButton(
               onPressed: () {
-                _showSuccessDialog();
+                print(
+                    'OTP Submitted for email: $emailuserlogin'); // Print the email when submit button is pressed
+                otpAccount(emailuserlogin);
               },
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(vertical: 15),
@@ -109,7 +167,7 @@ class _VerificationPageState extends State<VerificationPage> {
   Widget _buildCodeInput(TextEditingController controller) {
     return Container(
       width: 50,
-      child: TextField(
+      child: TextFormField(
         controller: controller,
         keyboardType: TextInputType.number,
         textAlign: TextAlign.center,
@@ -159,7 +217,7 @@ class _VerificationPageState extends State<VerificationPage> {
                   Navigator.pop(context); // Close the bottom sheet
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => HomePage()),
+                    MaterialPageRoute(builder: (context) => BotNav()),
                   );
                 },
                 style: ElevatedButton.styleFrom(
