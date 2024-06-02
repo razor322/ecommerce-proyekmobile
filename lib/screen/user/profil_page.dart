@@ -1,6 +1,7 @@
 import 'package:ecommerce_app/screen/auth/login_page.dart';
 import 'package:ecommerce_app/screen/user/edit_profil_page.dart';
 import 'package:ecommerce_app/screen/user/legal_policy_page.dart';
+import 'package:ecommerce_app/screen/user/settings_page.dart';
 import 'package:ecommerce_app/utils/cek_session.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -132,7 +133,7 @@ class _ProfilUserState extends State<ProfilUser> {
                             context,
                             MaterialPageRoute(
                                 builder: (context) =>
-                                    EditProfiluser()), // Log out userr
+                                    SettingsPage()), // Log out userr
                           ); // Add your logout logic here
                         },
                         style: ButtonStyle(
@@ -142,65 +143,7 @@ class _ProfilUserState extends State<ProfilUser> {
                               Colors.white), // Text color
                         ),
                         child: Text(
-                          'Edit Profile',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 18),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 15.0),
-
-                    Container(
-                      width: 350, // Lebar tombol
-                      height: 60, // Tinggi tombol
-
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    LegalPolicyPage()), // Log out userr
-                          ); // Add your logout logic here
-                        },
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all<Color>(
-                              Colors.greenAccent), // Background color
-                          foregroundColor: MaterialStateProperty.all<Color>(
-                              Colors.white), // Text color
-                        ),
-                        child: Text(
-                          'Legal & Policy',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 18),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 15.0),
-                    Container(
-                      width: 350, // Lebar tombol
-                      height: 60, // Tinggi tombol
-
-                      child: ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            session.clearSession();
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      Loginpage()), // Log out userr
-                            ); // Add your logout logic here
-                          });
-                        },
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all<Color>(
-                              Colors.greenAccent), // Background color
-                          foregroundColor: MaterialStateProperty.all<Color>(
-                              Colors.white), // Text color
-                        ),
-                        child: Text(
-                          'Log Out',
+                          'Settings',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 18),
                         ),
