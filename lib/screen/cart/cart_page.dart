@@ -1,9 +1,12 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:convert';
+
 import 'package:ecommerce_app/const.dart';
 import 'package:ecommerce_app/model/cart/model_delete_cart.dart';
-
+import 'package:ecommerce_app/model/cart/model_snap.dart';
 import 'package:ecommerce_app/model/product/model_get_cart.dart';
+import 'package:ecommerce_app/screen/cart/cart_detail_page.dart';
 import 'package:ecommerce_app/screen/product/detail_product_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -22,8 +25,9 @@ class _CartPageState extends State<CartPage> {
   late List<Cart> _productList = [];
   List<int> _quantities = [];
   List<double> _itemTotalPrices = [];
-  String? id;
+  String? id, username;
   double _totalPrice = 0.0;
+  int? _selectedProductId, _selectedCarttId;
 
   @override
   void initState() {
@@ -36,6 +40,7 @@ class _CartPageState extends State<CartPage> {
     SharedPreferences pref = await SharedPreferences.getInstance();
     setState(() {
       id = pref.getString("id") ?? '';
+      username = pref.getString("username") ?? '';
       print('id user $id');
     });
   }
@@ -79,7 +84,8 @@ class _CartPageState extends State<CartPage> {
       if (res.statusCode == 200) {
         ModelGetCart data = modelGetCartFromJson(res.body);
         setState(() {
-          _productList = data.cart;
+          _productList =
+              data.cart.where((item) => item.status != 'done').toList();
           _quantities =
               List.filled(_productList.length, 1); // Inisialisasi kuantitas
           _itemTotalPrices = List.generate(_productList.length,
@@ -93,7 +99,7 @@ class _CartPageState extends State<CartPage> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.toString())));
+          .showSnackBar(SnackBar(content: Text('data belum ada')));
     } finally {
       setState(() => isLoading = false);
     }
@@ -128,7 +134,57 @@ class _CartPageState extends State<CartPage> {
     }
   }
 
-  void _showForgotPasswordDialog(double total) {
+  void _showCheckoutDialog(
+      double total, String username, String product_id, String cart_id) {
+    final _formKey = GlobalKey<FormState>();
+    final TextEditingController _address = TextEditingController();
+    Future<void> checkout() async {
+      if (_formKey.currentState!.validate()) {
+        setState(() {
+          isLoading = true;
+        });
+
+        try {
+          http.Response res = await http.post(
+            Uri.parse('${url}payment_api.php'),
+            body: {
+              "name": username,
+              "price":
+                  total.toString(), // Ensure `total` is converted to `String`
+              "id": product_id,
+              "customer_address": _address.text,
+              "cart_id": cart_id
+            },
+          );
+
+          if (res.statusCode == 200) {
+            var response = jsonDecode(res.body);
+            if (response.containsKey('snap_token')) {
+              String snapToken = response['snap_token'];
+              // Navigate to CartdetailPage with the snapToken and cart_id
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CartdetailPage(snapToken, cart_id),
+                ),
+              );
+            } else {
+              // Handle error
+              print('Error: ${response['message']}');
+            }
+          } else {
+            print('Server error: ${res.statusCode}');
+          }
+        } catch (e) {
+          print('Error: $e');
+        } finally {
+          setState(() {
+            isLoading = false;
+          });
+        }
+      }
+    }
+
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -141,64 +197,78 @@ class _CartPageState extends State<CartPage> {
             ),
             color: Colors.white,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 16),
-              Text(
-                "Forgot Password $total",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                "Enter your email for the verification process, we will send a 4-digit code to your email.",
-                style: TextStyle(
-                  fontSize: 16,
-                ),
-              ),
-              SizedBox(height: 20),
-              TextField(
-                decoration: InputDecoration(
-                  hintText: 'Email',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: Color(0xFF67729429),
-                      width: 1,
-                    ),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 16),
+                Text(
+                  "Checkout",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
                   ),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16),
                 ),
-              ),
-              SizedBox(height: 25),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      // Navigator.pop(context);
-                      // _showResetPasswordDialog();
-                    },
-                    child: Text("Continue",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18)),
-                    style: ElevatedButton.styleFrom(
-                      primary: Color(0xFF0EBE7F), // Warna tombol continue
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                SizedBox(height: 20),
+                Row(
+                  children: [
+                    Text(
+                      "Total Belanja ",
+                      style: TextStyle(
+                        fontSize: 16,
                       ),
-                      minimumSize: Size(295, 54),
                     ),
+                    Text(
+                      NumberFormat.currency(locale: 'en_US', symbol: '\$')
+                          .format(total),
+                      style: TextStyle(
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                TextFormField(
+                  controller: _address,
+                  decoration: InputDecoration(
+                    hintText: 'Address',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: Color(0xFF67729429),
+                        width: 1,
+                      ),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16),
                   ),
-                ],
-              ),
-            ],
+                ),
+                SizedBox(height: 25),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        checkout();
+                      },
+                      child: Text("Bayar",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18)),
+                      style: ElevatedButton.styleFrom(
+                        primary: Color(0xFF0EBE7F), // Warna tombol continue
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        minimumSize: Size(295, 54),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -235,6 +305,10 @@ class _CartPageState extends State<CartPage> {
                                 Cart data = _productList[index];
                                 return GestureDetector(
                                   onTap: () {
+                                    setState(() {
+                                      _selectedProductId = data.productId;
+                                      _selectedCarttId = data.cartId;
+                                    });
                                     // Navigator.push(context, MaterialPageRoute(builder: (context)=>DetailProductPage(data)));
                                   },
                                   child: Container(
@@ -438,7 +512,18 @@ class _CartPageState extends State<CartPage> {
                   height: 60,
                   child: ElevatedButton(
                     onPressed: () {
-                      _showForgotPasswordDialog(_totalPrice);
+                      if (_selectedProductId != null) {
+                        _showCheckoutDialog(
+                          _totalPrice,
+                          username!,
+                          _selectedProductId.toString(),
+                          _selectedCarttId.toString(),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Please select a product')),
+                        );
+                      }
                     },
                     style: ButtonStyle(
                       backgroundColor:
