@@ -2,6 +2,7 @@
 
 import 'package:buttons_tabbar/buttons_tabbar.dart';
 import 'package:ecommerce_app/const.dart';
+import 'package:ecommerce_app/model/product/model_del_fav.dart';
 import 'package:ecommerce_app/model/product/model_get_fav.dart';
 import 'package:ecommerce_app/screen/product/detail_product_page.dart';
 import 'package:flutter/material.dart';
@@ -63,6 +64,36 @@ class _ListProductFavPageState extends State<ListProductFavPage> {
           .showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> deleteFav(int idfav) async {
+    try {
+      http.Response res = await http.post(
+          Uri.parse('${url}delete_favorite.php'),
+          body: {"favorite_id": idfav.toString()});
+
+      if (res.statusCode == 200) {
+        ModelDeleteFav data = modelDeleteFavFromJson(res.body);
+
+        if (data.status == "success") {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('${data.message}')),
+          );
+          setState(() {
+            getProduct();
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('${data.message}')),
+          );
+        }
+      }
+    } catch (e) {
+      print(e.toString());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('gagal menghapus data')),
+      );
     }
   }
 
@@ -229,7 +260,7 @@ class _ListProductFavPageState extends State<ListProductFavPage> {
             itemCount: productList.length,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              childAspectRatio: 0.9,
+              childAspectRatio: 0.8,
             ),
             itemBuilder: (context, index) {
               if (productList.isNotEmpty) {
@@ -248,9 +279,12 @@ class _ListProductFavPageState extends State<ListProductFavPage> {
                           alignment: Alignment.topRight,
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Icon(
-                              Icons.favorite_rounded,
-                              color: Colors.red,
+                            child: IconButton(
+                              icon: Icon(Icons.favorite_rounded,
+                                  color: Colors.red),
+                              onPressed: () {
+                                deleteFav(data.favoriteId);
+                              },
                             ),
                           ),
                         ),
