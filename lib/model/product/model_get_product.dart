@@ -42,6 +42,7 @@ class Product {
   String productImage;
   String productPrice;
   String productStore;
+  String qty;
   DateTime created;
   dynamic updated;
 
@@ -53,6 +54,7 @@ class Product {
     required this.productImage,
     required this.productPrice,
     required this.productStore,
+    required this.qty,
     required this.created,
     required this.updated,
   });
@@ -65,6 +67,7 @@ class Product {
         productImage: json["product_image"],
         productPrice: json["product_price"],
         productStore: json["product_store"],
+        qty: json["qty"],
         created: DateTime.parse(json["created"]),
         updated: json["updated"],
       );
@@ -77,6 +80,7 @@ class Product {
         "product_image": productImage,
         "product_price": productPrice,
         "product_store": productStore,
+        "qty": qty,
         "created": created.toIso8601String(),
         "updated": updated,
       };

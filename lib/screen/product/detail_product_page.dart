@@ -34,6 +34,7 @@ class _DetailProductPageState extends State<DetailProductPage> {
         productImage: favorite.productImage,
         productPrice: favorite.productPrice.toString(),
         productStore: favorite.productStore,
+        qty: favorite.qty.toString(),
         created: favorite.createdAt,
         updated: favorite.updated.toString(), productCategory: '',
         // Add other necessary fields and conversions here
@@ -295,48 +296,51 @@ class _DetailProductPageState extends State<DetailProductPage> {
                           ),
                         ),
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Choose amount",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 18),
-                          ),
-                          Row(
-                            children: [
-                              CircleAvatar(
-                                backgroundColor: Colors.white,
-                                child: IconButton(
-                                  onPressed: _decrementQuantity,
-                                  icon: Icon(Icons.remove),
-                                  color: Colors.black,
-                                  iconSize: 24,
-                                ),
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                '$_quantity',
-                                style: TextStyle(fontSize: 18),
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              CircleAvatar(
-                                backgroundColor: Colors.black,
-                                child: IconButton(
-                                  onPressed: _incrementQuantity,
-                                  icon: Icon(Icons.add),
-                                  color: Colors.white,
-                                  iconSize: 24,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                      SizedBox(
+                        height: 20,
                       ),
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      //   children: [
+                      //     Text(
+                      //       "Choose amount",
+                      //       style: TextStyle(
+                      //           fontWeight: FontWeight.bold, fontSize: 18),
+                      //     ),
+                      //     Row(
+                      //       children: [
+                      //         CircleAvatar(
+                      //           backgroundColor: Colors.white,
+                      //           child: IconButton(
+                      //             onPressed: _decrementQuantity,
+                      //             icon: Icon(Icons.remove),
+                      //             color: Colors.black,
+                      //             iconSize: 24,
+                      //           ),
+                      //         ),
+                      //         SizedBox(
+                      //           width: 10,
+                      //         ),
+                      //         Text(
+                      //           '$_quantity',
+                      //           style: TextStyle(fontSize: 18),
+                      //         ),
+                      //         SizedBox(
+                      //           width: 10,
+                      //         ),
+                      //         CircleAvatar(
+                      //           backgroundColor: Colors.black,
+                      //           child: IconButton(
+                      //             onPressed: _incrementQuantity,
+                      //             icon: Icon(Icons.add),
+                      //             color: Colors.white,
+                      //             iconSize: 24,
+                      //           ),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //   ],
+                      // ),
                       SizedBox(
                         height: 20,
                       ),

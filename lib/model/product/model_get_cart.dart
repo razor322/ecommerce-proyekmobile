@@ -45,6 +45,8 @@ class Cart {
   String productImage;
   int productPrice;
   String productStore;
+  String status;
+  int qty;
 
   Cart({
     required this.cartId,
@@ -58,6 +60,8 @@ class Cart {
     required this.productImage,
     required this.productPrice,
     required this.productStore,
+    required this.status,
+    required this.qty,
   });
 
   factory Cart.fromJson(Map<String, dynamic> json) => Cart(
@@ -72,6 +76,8 @@ class Cart {
         productImage: json["product_image"],
         productPrice: json["product_price"],
         productStore: json["product_store"],
+        status: json["status"],
+        qty: json["qty"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -86,5 +92,7 @@ class Cart {
         "product_image": productImage,
         "product_price": productPrice,
         "product_store": productStore,
+        "status": status,
+        "qty": qty,
       };
 }
