@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:midtrans_snap/midtrans_snap.dart';
 import 'package:midtrans_snap/models.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CartdetailPage extends StatefulWidget {
   final String token;
@@ -16,14 +17,25 @@ class CartdetailPage extends StatefulWidget {
 }
 
 class _CartdetailPageState extends State<CartdetailPage> {
-  String? snap_token, cart_idp;
+  String? snap_token, cart_idp, iduser;
   bool isLoading = false;
   @override
   void initState() {
     super.initState();
+    getSession();
     snap_token = widget.token;
     cart_idp = widget.cart_id;
     print(cart_idp);
+  }
+
+  Future getSession() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    setState(() {
+      iduser = pref.getString("id") ?? '';
+
+      print('id $iduser');
+      ;
+    });
   }
 
   Future<ModelPayments?> updateStatusCart(String idp) async {
@@ -33,14 +45,14 @@ class _CartdetailPageState extends State<CartdetailPage> {
       });
       http.Response res =
           await http.post(Uri.parse('${url}edit_cart.php'), body: {
-        "cart_id": idp,
+        "user_id": idp,
       });
       ModelPayments data = modelPaymentsFromJson(res.body);
       if (data.value == 1) {
         setState(() {
           isLoading = false;
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text('${data.message}')));
+          // ScaffoldMessenger.of(context)
+          //     .showSnackBar(SnackBar(content: Text('${data.message}')));
         });
         updateStatusPayment(idp);
         Navigator.pushAndRemoveUntil(
@@ -76,8 +88,8 @@ class _CartdetailPageState extends State<CartdetailPage> {
       if (data.value == 1) {
         setState(() {
           isLoading = false;
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text('${data.message}')));
+          // ScaffoldMessenger.of(context)
+          //     .showSnackBar(SnackBar(content: Text('${data.message}')));
         });
         Navigator.pushAndRemoveUntil(
             context,
@@ -118,7 +130,7 @@ class _CartdetailPageState extends State<CartdetailPage> {
               result.transactionStatus == 'capture') {
             // Pembayaran berhasil
 
-            updateStatusCart(cart_idp.toString());
+            updateStatusCart(iduser!);
             // updateStatusPayment(cart_idp.toString());
             // Navigator.pushAndRemoveUntil(
             //   context,

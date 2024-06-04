@@ -152,13 +152,15 @@ class _CartPageState extends State<CartPage> {
               "price":
                   total.toString(), // Ensure `total` is converted to `String`
               "id": product_id,
-              "customer_address": _address.text,
+              "customer_address": "padang",
               "cart_id": cart_id
             },
           );
 
           if (res.statusCode == 200) {
             var response = jsonDecode(res.body);
+
+            print(response);
             if (response.containsKey('snap_token')) {
               String snapToken = response['snap_token'];
               // Navigate to CartdetailPage with the snapToken and cart_id

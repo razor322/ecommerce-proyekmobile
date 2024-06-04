@@ -1,3 +1,4 @@
+import 'package:ecommerce_app/screen/cart-2/screen_cart.dart';
 import 'package:ecommerce_app/screen/cart/cart_page.dart';
 import 'package:ecommerce_app/screen/home_page.dart';
 import 'package:ecommerce_app/screen/product/list_product_fav.dart';
@@ -15,7 +16,7 @@ class _BotNavState extends State<BotNav> {
   final screen = [
     const HomePage(),
     const CartPage(),
-    ListProductFavPage(),
+    ShoppingCart(),
     ProfilUser()
   ];
   int _currentIndex = 0;
