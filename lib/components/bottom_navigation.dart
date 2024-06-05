@@ -1,11 +1,16 @@
+import 'package:ecommerce_app/noti.dart';
 import 'package:ecommerce_app/screen/cart-2/screen_cart.dart';
 import 'package:ecommerce_app/screen/cart/cart_page.dart';
 import 'package:ecommerce_app/screen/home_page.dart';
 import 'package:ecommerce_app/screen/product/list_product_fav.dart';
 import 'package:ecommerce_app/screen/user/profil_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:line_icons/line_icons.dart';
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
 class BotNav extends StatefulWidget {
   @override
@@ -13,10 +18,17 @@ class BotNav extends StatefulWidget {
 }
 
 class _BotNavState extends State<BotNav> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    Noti.initialize(flutterLocalNotificationsPlugin);
+  }
+
   final screen = [
     const HomePage(),
     const CartPage(),
-    ShoppingCart(),
+    ListProductFavPage(),
     ProfilUser()
   ];
   int _currentIndex = 0;
