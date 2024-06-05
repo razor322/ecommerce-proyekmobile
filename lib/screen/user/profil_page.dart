@@ -1,5 +1,6 @@
 import 'package:ecommerce_app/screen/auth/login_page.dart';
 import 'package:ecommerce_app/screen/user/edit_profil_page.dart';
+import 'package:ecommerce_app/screen/user/history_page.dart';
 import 'package:ecommerce_app/screen/user/legal_policy_page.dart';
 import 'package:ecommerce_app/screen/user/settings_page.dart';
 import 'package:ecommerce_app/utils/cek_session.dart';
@@ -144,6 +145,34 @@ class _ProfilUserState extends State<ProfilUser> {
                         ),
                         child: Text(
                           'Settings',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Container(
+                      width: 350, // Lebar tombol
+                      height: 60, // Tinggi tombol
+
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => HistoryPage()),
+                          );
+                        },
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all<Color>(
+                              Colors.greenAccent), // Background color
+                          foregroundColor: MaterialStateProperty.all<Color>(
+                              Colors.white), // Text color
+                        ),
+                        child: Text(
+                          'History',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 18),
                         ),
