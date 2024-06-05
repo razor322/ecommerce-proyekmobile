@@ -1,11 +1,16 @@
 import 'package:ecommerce_app/components/bottom_navigation.dart';
 import 'package:ecommerce_app/const.dart';
 import 'package:ecommerce_app/model/cart/model_payment.dart';
+import 'package:ecommerce_app/noti.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:midtrans_snap/midtrans_snap.dart';
 import 'package:midtrans_snap/models.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
 class CartdetailPage extends StatefulWidget {
   final String token;
@@ -54,7 +59,7 @@ class _CartdetailPageState extends State<CartdetailPage> {
           // ScaffoldMessenger.of(context)
           //     .showSnackBar(SnackBar(content: Text('${data.message}')));
         });
-        updateStatusPayment(idp);
+        updateStatusPayment(widget.cart_id);
         Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => BotNav()),
@@ -131,6 +136,10 @@ class _CartdetailPageState extends State<CartdetailPage> {
             // Pembayaran berhasil
 
             updateStatusCart(iduser!);
+            Noti.showBigTextNotification(
+                title: "Checkout Berhasil",
+                body: "terimakasih telah berbelanja",
+                fln: flutterLocalNotificationsPlugin);
             // updateStatusPayment(cart_idp.toString());
             // Navigator.pushAndRemoveUntil(
             //   context,
