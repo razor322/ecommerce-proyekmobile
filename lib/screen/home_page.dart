@@ -2,13 +2,20 @@ import 'package:contained_tab_bar_view/contained_tab_bar_view.dart';
 import 'package:ecommerce_app/components/custom_snackbar.dart';
 import 'package:ecommerce_app/const.dart';
 import 'package:ecommerce_app/model/product/model_get_product.dart';
+import 'package:ecommerce_app/noti.dart';
+import 'package:ecommerce_app/screen/NotificationPage.dart';
+import 'package:ecommerce_app/screen/TrackingDetailPage.dart';
 import 'package:ecommerce_app/screen/product/category_product_page.dart';
 import 'package:ecommerce_app/screen/product/detail_product_page.dart';
 import 'package:ecommerce_app/screen/product/list_product.dart';
 import 'package:ecommerce_app/screen/search_page.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -40,7 +47,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-
+    Noti.initialize(flutterLocalNotificationsPlugin);
     getProduct();
   }
 
@@ -83,8 +90,24 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.search_rounded),
           ),
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              // Noti.showBigTextNotification(
+              //     title: "Checkout Berhasil",
+              //     body: "Terima kasih telah berbelanja",
+              //     fln: flutterLocalNotificationsPlugin);
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => NotificationPage()));
+            },
             icon: Icon(Icons.notifications_none_rounded),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => TrackingDetailPage()));
+            },
+            icon: Icon(Icons.track_changes_sharp),
           ),
         ],
       ),
