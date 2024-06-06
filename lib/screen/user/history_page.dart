@@ -1,5 +1,6 @@
 import 'package:ecommerce_app/const.dart';
 import 'package:ecommerce_app/model/user/model_get_history.dart';
+import 'package:ecommerce_app/screen/user/detail_history_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -110,39 +111,52 @@ class _HistoryPageState extends State<HistoryPage> {
                       } catch (e) {
                         print('Error parsing amount: $e');
                       }
-                      return ListTile(
-                        title: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('Order ID: ${data.orderId}'),
-                            Container(
-                                decoration: BoxDecoration(
-                                    color: data.status == 'success'
-                                        ? Colors.green
-                                        : Colors.amber,
-                                    borderRadius: BorderRadius.circular(10)),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(4.0),
-                                  child: Text(
-                                    ' ${data.status}',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                )),
-                          ],
-                        ),
-                        subtitle: Padding(
-                          padding: const EdgeInsets.only(top: 10),
-                          child: Row(
+                      return GestureDetector(
+                        onTap: () {
+                          data.status == "success"
+                              ? Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          DetailHistory('padang')))
+                              : AlertDialog(
+                                  content: Text('selesaikan pesanan'),
+                                );
+                        },
+                        child: ListTile(
+                          title: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                NumberFormat.currency(
-                                        locale: 'en_US', symbol: '\$')
-                                    .format(amount),
-                              ),
-                              Text(DateFormat('dd MMMM yyyy')
-                                  .format(data.createdAt)),
+                              Text('Order ID: ${data.orderId}'),
+                              Container(
+                                  decoration: BoxDecoration(
+                                      color: data.status == 'success'
+                                          ? Colors.green
+                                          : Colors.amber,
+                                      borderRadius: BorderRadius.circular(10)),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(4.0),
+                                    child: Text(
+                                      ' ${data.status}',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  )),
                             ],
+                          ),
+                          subtitle: Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  NumberFormat.currency(
+                                          locale: 'en_US', symbol: '\$')
+                                      .format(amount),
+                                ),
+                                Text(DateFormat('dd MMMM yyyy')
+                                    .format(data.createdAt)),
+                              ],
+                            ),
                           ),
                         ),
                       );
